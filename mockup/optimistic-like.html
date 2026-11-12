@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>T16 Optimistic Like — the same 800 ms, felt as zero</title>
+<link rel="stylesheet" href="_shared/nocturne.css">
+<link rel="stylesheet" href="../style.css">
+<style>
+  /* the component from source/, dressed in Nocturne type */
+  #stage{background:radial-gradient(ellipse 65% 60% at 50% 45%,#0E1018 0%,var(--void) 72%);
+    --font:var(--f-text);--mono:var(--f-mono);--display:var(--f-display)}
+  #stage .op{position:absolute;left:130px;top:80px;zoom:1;z-index:1}
+  .halo{position:absolute;left:50%;top:44%;width:1300px;height:700px;margin:-350px 0 0 -650px;border-radius:50%;pointer-events:none;z-index:0;
+    background:radial-gradient(closest-side,rgba(255,111,181,.07),rgba(0,0,0,0))}
+
+</style>
+</head>
+<body>
+<div id="stage" class="grid" data-title="T16 Optimistic Like" data-url="veraetogrex-portfolio.github.io/optimistic-like">
+  <div class="halo"></div>
+  <section class="op" id="likes" aria-label="Like button: wait for the server vs optimistic update">
+    <header class="op-top">
+      <h1 class="op-title">Optimistic UI</h1>
+      <p class="op-rules"><span>Like button</span><b>Server 800 ms</b><b>Fails once</b></p>
+    </header>
+
+    <div class="op-cards">
+      <article class="op-card is-wait">
+        <p class="op-tag">Waits for the server</p>
+        <div class="op-post"><span class="op-ava"></span><div class="op-who"><b>Mira Okafor</b><span>@mira · 2 min</span></div></div>
+        <div class="op-shot"></div>
+        <div class="op-act">
+          <button class="op-like" aria-pressed="false" aria-label="Like"><span class="op-heart"><svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 6.9 4.5c2.1 0 3.6 1.2 5.1 3 1.5-1.8 3-3 5.1-3 3.5 0 5.5 3.5 4.2 6.8-1.8 4.6-9.3 9.2-9.3 9.2z" stroke-linejoin="round"/></svg><i class="op-spin"></i></span><span class="op-count">128</span></button>
+          <div class="op-felt"><small>Felt delay</small><b>— ms</b></div>
+        </div>
+        <div class="op-net"><span>Client</span><div class="op-track"><i class="op-ball"></i><em class="op-code"></em></div><span class="op-api">API</span></div>
+      </article>
+      <article class="op-card is-opt">
+        <p class="op-tag">Optimistic</p>
+        <div class="op-post"><span class="op-ava"></span><div class="op-who"><b>Mira Okafor</b><span>@mira · 2 min</span></div></div>
+        <div class="op-shot"></div>
+        <div class="op-act">
+          <button class="op-like" aria-pressed="false" aria-label="Like"><span class="op-heart"><svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 6.9 4.5c2.1 0 3.6 1.2 5.1 3 1.5-1.8 3-3 5.1-3 3.5 0 5.5 3.5 4.2 6.8-1.8 4.6-9.3 9.2-9.3 9.2z" stroke-linejoin="round"/></svg><i class="op-spin"></i></span><span class="op-count">128</span></button>
+          <div class="op-felt"><small>Felt delay</small><b>— ms</b></div>
+        </div>
+        <div class="op-net"><span>Client</span><div class="op-track"><i class="op-ball"></i><em class="op-code"></em></div><span class="op-api">API</span></div>
+      </article>
+    </div>
+
+    <div class="op-verdict" role="status">
+      <p class="op-caption">Same server. Same 800 ms.</p>
+      <p class="op-score">Felt <span class="r">800 ms</span><span class="a">→</span><span class="g">0 ms</span></p>
+    </div>
+  </section>
+  <div class="status-line"><span>Veraetogrex · T16</span><span>Like · optimistic update</span></div>
+</div>
+<script src="_shared/stage.js"></script>
+<script src="../script.js"></script>
+<script>
+const op = document.querySelector('#likes').likes;
+const [slow, fast] = op.buttons;
+Stage.init({
+  reset: () => op.reset(),
+  cursorStart: [430, 640],                 // already next to the left like
+  async demo(s) {
+    const t0 = performance.now();
+    await s.click(slow, { ms: 260 });      // spinner, 800 ms of nothing
+    await s.click(fast, { ms: 480 });      // heart at once; the request fails, retries, saves
+    await s.until(t0, 5000);
+    op.clear();                            // both unliked = first frame
+    await s.until(t0, 5700);
+  },
+});
+</script>
+</body>
+</html>
